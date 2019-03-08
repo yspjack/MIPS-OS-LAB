@@ -24,5 +24,5 @@ int main(){
 	int var;
 	scanf("%d", &var);
 	fibo(var);
-    return 0;
+        return 0;
 }
