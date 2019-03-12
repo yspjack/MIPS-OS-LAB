@@ -57,18 +57,59 @@ lp_Print(void (*output)(void *, char *, int),
     int length;
 
     for(;;) {
-	{ 
+	{
+            char *last=fmt;
 	    /* scan for the next '%' */
+            while(*fmt && *fmt!='%'){
+                ++fmt;
+            }
 	    /* flush the string found so far */
-
+            OUTPUT(arg,last,fmt-last);
 	    /* are we hitting the end? */
+            if(*fmt=='\0'){
+                break;
+            }
 	}
 
 	/* we found a '%' */
-	
-	/* check for long */
-
+	++fmt;
 	/* check for other prefixes */
+        ladjust=0;
+        if(*fmt=='-'){
+            ladjust=1;
+            ++fmt;
+        }
+        padc=' ';
+        if(*fmt=='0'){
+            padc='0';
+            ++fmt;
+        }
+
+        width=0;
+        if(IsDigit(*fmt)){
+            while(IsDigit(*fmt)){
+                width=width*10+Ctod(*fmt);
+                ++fmt;
+            }
+        }
+
+        prec=0;
+        if(*fmt=='.'){
+            ++fmt;
+            if(IsDigit(*fmt)){
+                while(IsDigit(*fmt)){
+                    prec=prec*10+Ctod(*fmt);
+                    ++fmt;
+                }
+            }
+        }
+
+        /* check for long */
+        longFlag=0;
+        if(*fmt=='l'){
+            ++fmt;
+            longFlag=1;
+        }
 
 	/* check format flag */
 	negFlag = 0;
