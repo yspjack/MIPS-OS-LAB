@@ -110,7 +110,13 @@
  */
 
 
-#define LIST_INSERT_AFTER(listelm, elm, field)
+#define	LIST_INSERT_AFTER(listelm, elm, field) do {			\
+	if ((LIST_NEXT((elm), field) = LIST_NEXT((listelm), field)) != NULL)\
+		LIST_NEXT((listelm), field)->field.le_prev =		\
+		    &LIST_NEXT((elm), field);				\
+	LIST_NEXT((listelm), field) = (elm);				\
+	(elm)->field.le_prev = &LIST_NEXT((listelm), field);		\
+} while (0)
         // Note: assign a to b <==> a = b
         //Step 1, assign elm.next to listelem.next.
         //Step 2: Judge whether listelm.next is NULL, if not, then assign listelm.pre to a proper value.
@@ -146,7 +152,22 @@
  * The "field" name is the link element as above. You can refer to LIST_INSERT_HEAD.
  * Note: this function has big differences with LIST_INSERT_HEAD !
  */
-#define LIST_INSERT_TAIL(head, elm, field)
+#define LIST_INSERT_TAIL(head, elm, field)                                                    \
+        do                                                                                    \
+        {                                                                                     \
+                struct Page *p;                                                               \
+                for (p = LIST_FIRST((head)); p && (p->field.le_next); p = (p->field.le_next)) \
+                        ;                                                                     \
+                if (p)                                                                        \
+                {                                                                             \
+                        LIST_INSERT_AFTER(p, (elm), field);                                   \
+                }                                                                             \
+                else                                                                          \
+                {                                                                             \
+                        LIST_FIRST((head)) = (elm);                                           \
+                        (elm)->field.le_prev = &LIST_FIRST((head));                           \
+                }                                                                             \
+        } while (0)
 /* finish your code here. */
 
 
