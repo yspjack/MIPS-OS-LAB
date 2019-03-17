@@ -20,7 +20,7 @@
 #define PDX(va)		((((u_long)(va))>>22) & 0x03FF)
 #define PTX(va)		((((u_long)(va))>>12) & 0x03FF)
 #define PTE_ADDR(pte)	((u_long)(pte)&~0xFFF)
-
+#define PDE_ADDR(pde)   PTE_ADDR(pde)
 // page number field of address
 #define PPN(va)		(((u_long)(va))>>12)
 #define VPN(va)		PPN(va)
