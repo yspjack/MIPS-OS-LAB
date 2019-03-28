@@ -155,7 +155,7 @@
 #define LIST_INSERT_TAIL(head, elm, field)                                                    \
         do                                                                                    \
         {                                                                                     \
-                struct Page *p;                                                               \
+                typeof(elm) p;                                                               \
                 for (p = LIST_FIRST((head)); p && (p->field.le_next); p = (p->field.le_next)) \
                         ;                                                                     \
                 if (p)                                                                        \
