@@ -257,6 +257,7 @@ static int load_icode_mapper(u_long va, u_int32_t sgsize,
         {
             return r;
         }
+        p->pp_ref++;
         if (i == 0)
         {
             if (BY2PG - offset > bin_size)
@@ -279,7 +280,7 @@ static int load_icode_mapper(u_long va, u_int32_t sgsize,
                 bcopy(bin + i - offset, (char *)page2kva(p), BY2PG);
             }
         }
-        r = page_insert(env->env_pgdir, p, va + i, PTE_V);
+        r = page_insert(env->env_pgdir, p, va + i, PTE_V | PTE_R);
         if (r < 0)
         {
             return r;
@@ -294,8 +295,8 @@ static int load_icode_mapper(u_long va, u_int32_t sgsize,
         {
             return r;
         }
-        ++p->pp_ref;
-        r = page_insert(env->env_pgdir, p, va + i, PTE_V);
+        p->pp_ref++;
+        r = page_insert(env->env_pgdir, p, va + i, PTE_V | PTE_R);
         if (r < 0)
         {
             return r;
