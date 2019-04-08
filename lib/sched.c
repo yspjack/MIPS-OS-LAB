@@ -13,5 +13,39 @@
  */
 void sched_yield(void)
 {
-
+    static int i = -1;
+    static int p = 0;
+    struct Env *e;
+    while (1)
+    {
+        if (LIST_EMPTY(&env_sched_list[p]))
+        {
+            p ^= 1;
+        }
+        LIST_FOREACH(e, &env_sched_list[p], env_sched_link)
+        {
+            if (e->env_status == ENV_RUNNABLE)
+            {
+                break;
+            }
+        }
+        if (i == -1)
+        {
+            i = e->env_pri;
+        }
+        else if (i == 0)
+        {
+            LIST_REMOVE(e, env_sched_link);
+            LIST_INSERT_HEAD(&env_sched_list[p ^ 1], e, env_sched_link);
+            i = -1;
+        }
+        else
+        {
+            // printf("DEBUG:time %d\n", i);
+            --i;
+            env_run(e);
+            panic("unreachable after env_run");
+        }
+    }
+    panic("unreachable");
 }

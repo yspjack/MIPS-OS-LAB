@@ -105,7 +105,7 @@ static Pte *boot_pgdir_walk(Pde *pgdir, u_long va, int create)
         // set the correct permission bits
     }
     /* Step 3: Get the page table entry for `va`, and return it. */
-    pgtable = (Pte *)KADDR(PDE_ADDR(*pgdir_entryp));
+    pgtable = (Pte *)KADDR(PTE_ADDR(*pgdir_entryp));
     pgtable_entry = &pgtable[PTX(va)];
     return pgtable_entry;
 }
@@ -308,7 +308,7 @@ pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte)
     }
 
     /* Step 3: Set the page table entry to `*ppte` as return value. */
-    pgtable = (Pte *)KADDR(PDE_ADDR(*pgdir_entryp));
+    pgtable = (Pte *)KADDR(PTE_ADDR(*pgdir_entryp));
     (*ppte) = &pgtable[PTX(va)];
 
     return 0;
