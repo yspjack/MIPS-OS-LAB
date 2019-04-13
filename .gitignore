@@ -4,3 +4,4 @@
 patch.txt
 up_patch.sh
 *.patch
+gxemul/vmlinux

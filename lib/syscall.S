@@ -91,7 +91,7 @@ END(handle_sys)
 
 EXPORT(sys_call_table)
 syscalltable
-.size sys_call_table, . - sys_call_table 
+.size sys_call_table, . - sys_call_table
 
 
 
