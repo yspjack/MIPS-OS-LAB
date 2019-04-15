@@ -90,61 +90,61 @@ NESTED(do_refill,0 , sp)
 //this "1" is important
 1:	//j 1b
 	nop
-	lw	k1,mCONTEXT
+	lw	k1,mCONTEXT		// Load page directory
 	and	k1,0xfffff000
 	mfc0	k0,CP0_BADVADDR
 	srl	k0,20
-	and	k0,0xfffffffc
+	and	k0,0xfffffffc	// align to 4 byte
 	addu	k0,k1
 
-	lw	k1,0(k0)
+	lw	k1,0(k0)		// Load page directory entry
 	nop
 	move	t0,k1
-	and	t0,0x0200
+	and	t0,0x0200		// test VALID bit
 	beqz	t0,NOPAGE
 	nop
-	and	k1,0xfffff000
+	and	k1,0xfffff000	// get page table
 	mfc0	k0,CP0_BADVADDR
 	srl	k0,10
-	and	k0,0xfffffffc
-	and	k0,0x00000fff
+	and	k0,0xfffffffc	// align to 4 byte
+	and	k0,0x00000fff	// get offset
 	addu	k0,k1
 
-	or	k0,0x80000000
-	lw	k1,0(k0)
+	or	k0,0x80000000	// get KADDR
+	lw	k1,0(k0)		// Load page table entry
 	nop
 	move	t0,k1
-	and	t0,0x0200
+	and	t0,0x0200		// test VALID bit
 	beqz	t0,NOPAGE
 	nop
 	move	k0,k1
-	and	k0,0x1
+	and	k0,0x1			// test Copy On Write bit
 	beqz	k0,NoCOW
 	nop
-	and	k1,0xfffffbff
+	and	k1,0xfffffbff	// Needed by Copy On Write: clear DIRTY bit
 NoCOW:
 	mtc0	k1,CP0_ENTRYLO0
 	nop
-	tlbwr
+	tlbwr				// write tlb
 
-	j	2f
+	j	2f				// return
 	nop
 NOPAGE:
 //3: j 3b
 nop
 	mfc0	a0,CP0_BADVADDR
-	lw	a1,mCONTEXT
+	lw	a1,mCONTEXT		// Load pgdir
 	nop
 
-	sw	 	ra,tlbra
+	sw	 	ra,tlbra	// save $ra
 	jal	pageout
 	nop
 //3: j 3b
 nop
-	lw	ra,tlbra
+	lw	ra,tlbra		// restore $ra
 	nop
 
-	j	1b
+	j	1b				// try again
 2:	nop
 
 	jr	ra

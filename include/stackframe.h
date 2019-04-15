@@ -2,7 +2,7 @@
 #include <asm/cp0regdef.h>
 #include <asm/asm.h>
 #include <trap.h>
-
+// Enable Int
 .macro STI
 	mfc0	t0,	CP0_STATUS
 	li	t1, (STATUS_CU0 | 0x1)
@@ -11,7 +11,7 @@
 
 .endm
 
-
+// Disable Int
 .macro CLI
 	mfc0	t0, CP0_STATUS
 	li	t1, (STATUS_CU0 | 0x1)
@@ -33,13 +33,13 @@
 	//lw	k1,%lo(kernelsp)(k1)  //not clear right now
 
 1:
-	move	k0,sp
+	move	k0,sp		// k0 := old sp
 	get_sp
 	move	k1,sp
-	subu	sp,k1,TF_SIZE
-	sw	k0,TF_REG29(sp)
-	sw	$2,TF_REG2(sp)
-	mfc0	v0,CP0_STATUS
+	subu	sp,k1,TF_SIZE	// get Trapframe address
+	sw	k0,TF_REG29(sp)		// save old sp
+	sw	$2,TF_REG2(sp)		// save v0
+	mfc0	v0,CP0_STATUS	// save cp0 reg
 	sw	v0,TF_STATUS(sp)
 	mfc0	v0,CP0_CAUSE
 	sw	v0,TF_CAUSE(sp)
@@ -47,7 +47,7 @@
 	sw	v0,TF_EPC(sp)
 	mfc0	v0, CP0_BADVADDR
 	sw	v0, TF_BADVADDR(sp)
-	mfhi	v0
+	mfhi	v0				// save other reg
 	sw	v0,TF_HI(sp)
 	mflo	v0
 	sw	v0,TF_LO(sp)
@@ -92,15 +92,15 @@
 	mfc0	t0,CP0_STATUS
 	ori	t0,0x3
 	xori	t0,0x3
-	mtc0	t0,CP0_STATUS
+	mtc0	t0,CP0_STATUS	// clear KUc and IEc
 	lw	v0,TF_STATUS(sp)
 	li	v1, 0xff00
-	and	t0, v1
-	nor	v1, $0, v1
-	and	v0, v1
-	or	v0, t0
+	and	t0, v1				// get IM field
+	nor	v1, $0, v1			// ?
+	and	v0, v1				// ?
+	or	v0, t0				// ?
 	mtc0	v0,CP0_STATUS
-	lw	v1,TF_LO(sp)
+	lw	v1,TF_LO(sp)		// restore registers
 	mtlo	v1
 	lw	v0,TF_HI(sp)
 	lw	v1,TF_EPC(sp)
@@ -153,17 +153,17 @@
 
 .macro get_sp
 	mfc0	k1, CP0_CAUSE
-	andi	k1, 0x107C
-	xori	k1, 0x1000
+	andi	k1, 0x107C		// get ExcCode and IP
+	xori	k1, 0x1000		// get IP
 	bnez	k1, 1f
-	nop
-	li	sp, 0x82000000
+	nop						// Clock INT
+	li	sp, 0x82000000		// TIMESTACK
 	j	2f
 	nop
 1:
-	bltz	sp, 2f
-	nop
-	lw	sp, KERNEL_SP
+	bltz	sp, 2f			// sp in kernel space?
+	nop						// sp < 0x80000000
+	lw	sp, KERNEL_SP		// KERNEL_SP defined in env_asm.S
 	nop
 
 2:	nop

@@ -60,6 +60,11 @@ int envid2env(u_int envid, struct Env **penv, int checkperm)
         *penv = curenv;
         return 0;
     }
+    // Look up the Env structure via the index part of the envid,
+    // then check the env_id field in that struct Env
+    // to ensure that the envid is not stale
+    // (i.e., does not refer to a _previous_ environment
+    // that used the same slot in the envs[] array).
     e = &envs[ENVX(envid)];
     if (e->env_status == ENV_FREE || e->env_id != envid)
     {
@@ -211,6 +216,7 @@ int env_alloc(struct Env **new, u_int parent_id)
 
     /*Step 4: focus on initializing env_tf structure, located at this new Env. 
      * especially the sp register,CPU status. */
+    bzero(&e->env_tf, sizeof(struct Trapframe));
     e->env_tf.cp0_status = 0x10001004;
     e->env_tf.regs[29] = USTACKTOP;
 
