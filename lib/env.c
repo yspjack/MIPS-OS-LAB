@@ -224,7 +224,6 @@ int env_alloc(struct Env **new, u_int parent_id)
     *new = e;
     LIST_REMOVE(e, env_link);
     // printf("DEBUG:create env %d\n",e->env_id);
-    LIST_INSERT_HEAD(&env_sched_list[0], e, env_sched_link);
     return 0;
 }
 
@@ -363,6 +362,7 @@ load_icode(struct Env *e, u_char *binary, u_int size)
     /***Your Question Here***/
     /*Step 4:Set CPU's PC register as appropriate value. */
     e->env_tf.pc = entry_point;
+    LIST_INSERT_HEAD(&env_sched_list[0], e, env_sched_link);
 }
 
 /* Overview:
