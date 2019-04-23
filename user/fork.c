@@ -139,11 +139,11 @@ duppage(u_int envid, u_int pn)
         {
             perm = PTE_V | PTE_COW;
         }
-        if (syscall_mem_map(0, addr, envid, addr, perm | PTE_COW) < 0)
+        if (syscall_mem_map(0, addr, envid, addr, perm) < 0)
         {
             user_panic("duppage: map failed\n");
         }
-        if (syscall_mem_map(0, addr, 0, addr, perm | PTE_COW) < 0)
+        if (syscall_mem_map(0, addr, 0, addr, perm) < 0)
         {
             user_panic("duppage: map failed\n");
         }
