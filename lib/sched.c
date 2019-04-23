@@ -18,6 +18,8 @@ void sched_yield(void)
     struct Env *e;
     while (1)
     {
+
+#if 1
         if (LIST_EMPTY(&env_sched_list[p]))
         {
             p ^= 1;
@@ -28,6 +30,10 @@ void sched_yield(void)
             {
                 break;
             }
+        }
+        if (e == NULL)
+        {
+            continue;
         }
         if (i == -1)
         {
@@ -46,6 +52,14 @@ void sched_yield(void)
             env_run(e);
             panic("unreachable after env_run");
         }
+#else
+        i = (i + 1) % NENV;
+        if (envs[i].env_status == ENV_RUNNABLE)
+        {
+            env_run(&envs[i]);
+            panic("unreachable after env_run");
+        }
+#endif
     }
     panic("unreachable");
 }
