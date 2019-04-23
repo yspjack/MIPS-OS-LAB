@@ -288,7 +288,7 @@ int sys_env_alloc(void)
     // register set is copied from the current environment
     bcopy((void *)(KERNEL_SP - sizeof(struct Trapframe)), &(e->env_tf), sizeof(struct Trapframe));
     e->env_tf.pc = e->env_tf.cp0_epc;
-    printf("sys_env_alloc:child pc :%x\n", e->env_tf.pc);
+    // printf("sys_env_alloc:child pc :%x\n", e->env_tf.pc);
     // tweak return value of the child
     e->env_tf.regs[2] = 0;
     return e->env_id;
