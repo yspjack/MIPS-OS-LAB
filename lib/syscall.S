@@ -40,6 +40,11 @@ NESTED(handle_sys,TF_SIZE, sp)
     sw      t6, 8(sp)
     sw      t7, 12(sp)
 
+    move    a0, t1
+    move    a1, t5
+    move    a2, t6
+    move    a3, t7
+
     jalr    t2                          // Invoke sys_* function
     nop
 
