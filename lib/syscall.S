@@ -15,7 +15,7 @@ NESTED(handle_sys,TF_SIZE, sp)
     addiu   t0, t0, 4
     sw      t0, TF_EPC(sp)
     // TODO: Copy the syscall number into $a0.
-    lw      a0, TF_REG2(sp)
+    lw      a0, TF_REG4(sp)
 
     addiu   a0, a0, -__SYSCALL_BASE     // a0 <- relative syscall number
     sll     t0, a0, 2                   // t0 <- relative syscall number times 4
@@ -28,22 +28,9 @@ NESTED(handle_sys,TF_SIZE, sp)
     lw      t4, 20(t0)                  // t4 <- the 6th argument of msyscall
 
     // TODO: Allocate a space of six arguments on current kernel stack and copy the six arguments to proper location
-    lw      t1, 0(t0)
-    lw      t5, 4(t0)
-    lw      t6, 8(t0)
-    lw      t7, 12(t0)
     addiu   sp, sp, -24
     sw      t3, 16(sp)
     sw      t4, 20(sp)
-    sw      t1, 0(sp)
-    sw      t5, 4(sp)
-    sw      t6, 8(sp)
-    sw      t7, 12(sp)
-
-    move    a0, t1
-    move    a1, t5
-    move    a2, t6
-    move    a3, t7
 
     jalr    t2                          // Invoke sys_* function
     nop

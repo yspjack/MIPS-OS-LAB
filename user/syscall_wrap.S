@@ -5,10 +5,6 @@
 
 LEAF(msyscall)
     // TODO: execute a `syscall` instruction and return from msyscall
-    sw a0, 0(sp)    // syscall arguments
-    sw a1, 4(sp)
-    sw a2, 8(sp)
-    sw a3, 12(sp)
     move v0, a0     // syscall number
     syscall
     jr ra
