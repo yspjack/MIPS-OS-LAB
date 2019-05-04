@@ -201,7 +201,7 @@ int fork(void)
             for (j = 0; j < 1024; ++j)
             {
                 u_int pn = (i << 10) | j;
-                if (pn >= (UXSTACKTOP / BY2PG))
+                if (pn >= (UXSTACKTOP - BY2PG) / BY2PG)
                     break;
                 if ((*vpt)[pn])
                     duppage(newenvid, pn);
