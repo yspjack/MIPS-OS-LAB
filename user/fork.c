@@ -86,7 +86,7 @@ static void
 pgfault(u_int va)
 {
     u_int tmp;
-    u_int PFTEMP = (u_int)(UTEXT-2*BY2PG);
+    u_int PFTEMP = (u_int)(UTEXT - 2 * BY2PG);
     // writef("fork.c:pgfault():\t va:%x\n", va);
     if (!((*vpt)[VPN(va)] & PTE_COW))
     {
@@ -173,7 +173,7 @@ int fork(void)
     u_int newenvid;
     extern struct Env *envs;
     extern struct Env *env;
-    u_int i;
+    u_int i, j;
 
     //The parent installs pgfault using set_pgfault_handler
     set_pgfault_handler(pgfault);
@@ -194,11 +194,18 @@ int fork(void)
         return 0;
     }
     DEBUG("fork::parent\n");
-    for (i = 0; i < (UTOP / BY2PG) - 2; ++i)
+    for (i = 0; i < 1024; ++i)
     {
-        if (((*vpd)[i >> 10]) && ((*vpt)[i]))
+        if ((*vpd)[i])
         {
-            duppage(newenvid, i);
+            for (j = 0; j < 1024; ++j)
+            {
+                u_int pn = (i << 10) | j;
+                if (pn >= (UXSTACKTOP / BY2PG))
+                    break;
+                if ((*vpt)[pn])
+                    duppage(newenvid, pn);
+            }
         }
     }
     DEBUG("fork::parent: duppage\n");
