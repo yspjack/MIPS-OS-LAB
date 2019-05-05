@@ -8,3 +8,5 @@ gxemul/vmlinux
 *.b
 *.x
 
+gxemul/fs.img
+fs/fsformat
