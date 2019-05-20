@@ -7,7 +7,7 @@
 #include "fd.h"
 #include "lib.h"
 #include <mmu.h>
-
+#define debug 0
 struct Open {
 	struct File *o_file;	// mapped descriptor for open file
 	u_int o_fileid;			// file id
