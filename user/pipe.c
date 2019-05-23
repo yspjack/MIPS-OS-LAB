@@ -71,26 +71,30 @@ static int
 _pipeisclosed(struct Fd *fd, struct Pipe *p)
 {
 	// Your code here.
-	// 
+	//
 	// Check pageref(fd) and pageref(p),
 	// returning 1 if they're the same, 0 otherwise.
-	// 
+	//
 	// The logic here is that pageref(p) is the total
 	// number of readers *and* writers, whereas pageref(fd)
 	// is the number of file descriptors like fd (readers if fd is
 	// a reader, writers if fd is a writer).
-	// 
+	//
 	// If the number of file descriptors like fd is equal
 	// to the total number of readers and writers, then
 	// everybody left is what fd is.  So the other end of
 	// the pipe is closed.
-	int pfd,pfp,runs;
-	
-
-
-
-	user_panic("_pipeisclosed not implemented");
-//	return 0;
+	int pfd, pfp, runs;
+	while (1)
+	{
+		runs = env->env_runs;
+		pfd = pageref(fd);
+		pfp = pageref(p);
+		if (runs == env->env_runs)
+			return pfd == pfp;
+	}
+	// user_panic("_pipeisclosed not implemented");
+	return 0;
 }
 
 int
@@ -110,7 +114,7 @@ static int
 piperead(struct Fd *fd, void *vbuf, u_int n, u_int offset)
 {
 	// Your code here.  See the lab text for a description of
-	// what piperead needs to do.  Write a loop that 
+	// what piperead needs to do.  Write a loop that
 	// transfers one byte at a time.  If you decide you need
 	// to yield (because the pipe is empty), only yield if
 	// you have not yet copied any bytes.  (If you have copied
@@ -120,17 +124,30 @@ piperead(struct Fd *fd, void *vbuf, u_int n, u_int offset)
 	int i;
 	struct Pipe *p;
 	char *rbuf;
-	
-
-
-	user_panic("piperead not implemented");
-//	return -E_INVAL;
+	p = (struct Pipe *)fd2data(fd);
+	rbuf = vbuf;
+	for (i = 0; i < n; i++)
+	{
+		while (p->p_rpos == p->p_wpos)
+		{
+			if (i > 0)
+				return i;
+			if (_pipeisclosed(fd, p))
+				return 0;
+			syscall_yield();
+		}
+		rbuf[i] = p->p_buf[p->p_rpos % BY2PIPE];
+		p->p_rpos++;
+	}
+	return i;
+	// user_panic("piperead not implemented");
+	//	return -E_INVAL;
 }
 
 static int
 pipewrite(struct Fd *fd, const void *vbuf, u_int n, u_int offset)
 {
-	// Your code here.  See the lab text for a description of what 
+	// Your code here.  See the lab text for a description of what
 	// pipewrite needs to do.  Write a loop that transfers one byte
 	// at a time.  Unlike in read, it is not okay to write only some
 	// of the data.  If the pipe fills and you've only copied some of
@@ -140,14 +157,23 @@ pipewrite(struct Fd *fd, const void *vbuf, u_int n, u_int offset)
 	int i;
 	struct Pipe *p;
 	char *wbuf;
-	
-
-//	return -E_INVAL;
-	
-	
-	user_panic("pipewrite not implemented");
-
-	return n;
+	p = (struct Pipe *)fd2data(fd);
+	wbuf = vbuf;
+	for (i = 0; i < n; i++)
+	{
+		while (p->p_wpos >= p->p_rpos + sizeof(p->p_buf))
+		{
+			if (_pipeisclosed(fd, p))
+				return 0;
+			syscall_yield();
+		}
+		p->p_buf[p->p_wpos % BY2PIPE] = wbuf[i];
+		p->p_wpos++;
+	}
+	return i;
+	//	return -E_INVAL;
+	// user_panic("pipewrite not implemented");
+	// return n;
 }
 
 static int
