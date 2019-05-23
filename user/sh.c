@@ -106,12 +106,31 @@ again:
 			}
 			// Your code here -- open t for reading,
 			// dup it onto fd 0, and then close the fd you got.
-			user_panic("< redirection not implemented");
+			// user_panic("< redirection not implemented");
+			if ((fd = open(t, O_RDONLY)) < 0)
+			{
+				writef("open %s for read: %d", t, fd);
+				exit();
+			}
+			dup(fd, 0);
+			close(fd);
 			break;
 		case '>':
 			// Your code here -- open t for writing,
 			// dup it onto fd 1, and then close the fd you got.
-			user_panic("> redirection not implemented");
+			// user_panic("> redirection not implemented");
+			if (gettoken(0, &t) != 'w')
+			{
+				writef("syntax error: > not followed by word\n");
+				exit();
+			}
+			if ((fd = open(t, O_RDWR | O_CREAT | O_TRUNC)) < 0)
+			{
+				writef("open %s for write: %d", t, fd);
+				exit();
+			}
+			dup(fd, 1);
+			close(fd);
 			break;
 		case '|':
 			// Your code here.
@@ -129,6 +148,32 @@ again:
 			//		set "rightpipe" to the child envid
 			//		goto runit, to execute this piece of the pipeline
 			//			and then wait for the right side to finish
+			if ((r = pipe(p)) < 0)
+			{
+				writef("pipe: %d\n", r);
+				return r;
+			}
+			if (debug)
+				writef("PIPE: %d %d\n", p[0], p[1]);
+			if ((r = fork()) < 0)
+			{
+				writef("fork: %d\n", r);
+			}
+			if (r == 0)
+			{
+				dup(p[0], 0);
+				close(p[0]);
+				close(p[1]);
+				goto again;
+			}
+			else
+			{
+				rightpipe = r;
+				dup(p[1], 1);
+				close(p[1]);
+				close(p[0]);
+				goto runit;
+			}
 			user_panic("| not implemented");
 			break;
 		}
@@ -206,11 +251,11 @@ umain(int argc, char **argv)
 	int r, interactive, echocmds;
 	interactive = '?';
 	echocmds = 0;
-	writef("\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
-	writef("::                                                         ::\n");
-	writef("::              Super Shell  V0.0.0_1                      ::\n");
-	writef("::                                                         ::\n");
-	writef(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
+	// writef("\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
+	// writef("::                                                         ::\n");
+	// writef("::              Super Shell  V0.0.0_1                      ::\n");
+	// writef("::                                                         ::\n");
+	// writef(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
 	ARGBEGIN{
 	case 'd':
 		debug++;
