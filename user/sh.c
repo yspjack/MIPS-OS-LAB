@@ -129,7 +129,6 @@ again:
 				writef("open %s for write: %d", t, fd);
 				exit();
 			}
-                        ftruncate(fd, 0);
 			dup(fd, 1);
 			close(fd);
 			break;
