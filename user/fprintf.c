@@ -8,10 +8,11 @@ static void user_out2string(void *arg, char *s, int l)
 	char * b = (char *)arg;
     // special termination call
     if ((l==1) && (s[0] == '\0')) return;
-    
+	if (l == 0)return;
     for (i=0; i< l; i++) {
 	b[i]=s[i];
     }
+    b[l] = '\0';
 }
 
 
