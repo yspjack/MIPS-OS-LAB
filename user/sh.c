@@ -124,7 +124,7 @@ again:
 				writef("syntax error: > not followed by word\n");
 				exit();
 			}
-			if ((fd = open(t, O_RDWR | O_CREAT | O_TRUNC)) < 0)
+			if ((fd = open(t, O_RDWR)) < 0)
 			{
 				writef("open %s for write: %d", t, fd);
 				exit();
