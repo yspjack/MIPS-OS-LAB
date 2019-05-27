@@ -20,7 +20,7 @@ static void user_out2string(void *arg, char *s, int l)
 	{
 		*b++ = s[i];
 	}
-	*b++ = '\0';
+	b[l] = '\0';
 }
 
 
